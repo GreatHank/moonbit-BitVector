@@ -234,6 +234,16 @@ pub fn not(self : BitVector) -> BitVector {
 }
 
 ///|
+pub fn population_count(self : BitVector) -> Int {
+  loop self[0], self.len - 1, 0 {
+    One, 0, sum => return sum + 1
+    Zero, 0, sum => return sum
+    One, i, sum => continue self[self.len - 1 - i], i - 1, sum + 1
+    Zero, i, sum => continue self[self.len - 1 - i], i - 1, sum
+  }
+}
+
+///|
 test {
   let vector = BitVector::new(15)
   vector.set_all()
@@ -271,5 +281,10 @@ test "move" {
     content="[11111111111111100000000000000000000111111111111111]",
   )
   let v5 = not(v4)
-  inspect!(v5.to_string(),content="[00000000000000011111111111111111111000000000000000]")
+  inspect!(
+    v5.to_string(),
+    content="[00000000000000011111111111111111111000000000000000]",
+  )
+  let num = population_count(vector)
+  inspect!(num, content="50")
 }
