@@ -188,13 +188,49 @@ fn meet_two_vector(
 
 ///|
 pub fn and(self : BitVector, other : BitVector) -> BitVector {
-  let ans = BitVector::new(self.len)
+  let ans = BitVector::new(@math.maximum(self.len, other.len))
   let (long, short) = meet_two_vector(self, other)
   let array_index = (long.len + 31) / 32
   for i in 0..<array_index {
     ans.data[i] = long.data[i] & short.data[i]
   }
   ans
+}
+
+///|
+pub fn or(self : BitVector, other : BitVector) -> BitVector {
+  let ans = BitVector::new(@math.maximum(self.len, other.len))
+  let (long, short) = meet_two_vector(self, other)
+  let array_index = (long.len + 31) / 32
+  for i in 0..<array_index {
+    ans.data[i] = long.data[i] | short.data[i]
+  }
+  ans
+}
+
+///|
+pub fn xor(self : BitVector, other : BitVector) -> BitVector {
+  let ans = BitVector::new(@math.maximum(self.len, other.len))
+  let (long, short) = meet_two_vector(self, other)
+  let array_index = (long.len + 31) / 32
+  for i in 0..<array_index {
+    ans.data[i] = long.data[i] ^ short.data[i]
+  }
+  ans
+}
+
+///|
+pub fn not(self : BitVector) -> BitVector {
+  let max : UInt = 4294967295
+  let new_vector = BitVector::new(self.len)
+  let array_index = (self.len + 31) / 32
+  let array_rest = self.len % 32
+  for i in 0..<(array_index - 1) {
+    new_vector.data[i] = self.data[i] ^ max
+  }
+  let move_num = max << (32 - array_rest)
+  new_vector.data[array_index - 1] = self.data[array_index - 1] ^ move_num
+  new_vector
 }
 
 ///|
@@ -224,4 +260,16 @@ test "move" {
     v2.to_string(),
     content="[00000000000000000000000000000000000111111111111111]",
   )
+  let v3 = and(vector, v2)
+  inspect!(
+    v3.to_string(),
+    content="[00000000000000000000000000000000000111111111111111]",
+  )
+  let v4 = or(v1, v2)
+  inspect!(
+    v4.to_string(),
+    content="[11111111111111100000000000000000000111111111111111]",
+  )
+  let v5 = not(v4)
+  inspect!(v5.to_string(),content="[00000000000000011111111111111111111000000000000000]")
 }

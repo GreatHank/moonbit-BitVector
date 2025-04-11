@@ -60,7 +60,7 @@ pub fn moonbit_test_driver_internal_execute(filename: MoonbitTestDriverInternalE
   let message = message.escape()
   @moonbitlang/core/builtin.println("----- BEGIN MOON TEST RESULT -----")
   @moonbitlang/core/builtin.println(
-    "{\"package\": \"GreatHank/BitVector/lib\", \"filename\": \{file_name}, \"index\": \"\{index}\", \"test_name\": \{test_name}, \"message\": \{message}}",
+    "{\"package\": \"GreatHank/BitVector\", \"filename\": \{file_name}, \"index\": \"\{index}\", \"test_name\": \{test_name}, \"message\": \{message}}",
   )
   @moonbitlang/core/builtin.println("----- END MOON TEST RESULT -----")
 }

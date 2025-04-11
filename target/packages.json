@@ -5,11 +5,11 @@
     {
       "is-main": false,
       "is-third-party": false,
-      "root-path": "D:\\Hankstudy\\github\\self\\BitVector\\src\\lib",
+      "root-path": "D:\\Hankstudy\\github\\self\\BitVector\\src",
       "root": "GreatHank/BitVector",
-      "rel": "lib",
+      "rel": "",
       "files": {
-        "D:\\Hankstudy\\github\\self\\BitVector\\src\\lib\\mutable_BitVector.mbt": {
+        "D:\\Hankstudy\\github\\self\\BitVector\\src\\mutable_BitVector.mbt": {
           "backend": [
             "Wasm",
             "WasmGC",
@@ -22,7 +22,7 @@
             "Release"
           ]
         },
-        "D:\\Hankstudy\\github\\self\\BitVector\\src\\lib\\type.mbt": {
+        "D:\\Hankstudy\\github\\self\\BitVector\\src\\type.mbt": {
           "backend": [
             "Wasm",
             "WasmGC",
@@ -42,7 +42,7 @@
       "deps": [],
       "wbtest-deps": [],
       "test-deps": [],
-      "artifact": "D:\\Hankstudy\\github\\self\\BitVector\\target\\wasm-gc\\release\\check\\lib\\lib.mi"
+      "artifact": "D:\\Hankstudy\\github\\self\\BitVector\\target\\wasm-gc\\release\\check\\BitVector.mi"
     }
   ],
   "deps": [],
