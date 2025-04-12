@@ -8,7 +8,7 @@ pub fn BitVector::new(length : Int) -> BitVector {
 
 ///|
 pub fn copy(self : BitVector) -> BitVector {
-  { len: self.len, data: self.data }
+  { len: self.len, data: self.data.copy() }
 }
 
 ///|
