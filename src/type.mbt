@@ -1,5 +1,5 @@
 ///|
-enum BitType {
+pub(all) enum BitType {
   Zero
   One
 } derive(Eq)
@@ -11,7 +11,7 @@ struct BitVector {
 }
 
 ///|
-struct ByteVector {
+pub struct ByteVector {
   len : Int
   data : Array[Byte]
 }

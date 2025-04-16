@@ -1,0 +1,95 @@
+package "GreatHank/BitVector"
+
+// Values
+fn and(BitVector, BitVector) -> BitVector
+
+fn clear(BitVector) -> Unit
+
+fn combine(BitVector, BitVector) -> BitVector
+
+fn copy(BitVector) -> BitVector
+
+fn deserialization(ByteVector) -> BitVector
+
+fn find_first_set(BitVector) -> Int
+
+fn find_first_unset(BitVector) -> Int
+
+fn flip(BitVector, Int) -> Unit
+
+fn not(BitVector) -> BitVector
+
+fn op_get(BitVector, Int) -> BitType
+
+fn op_set(BitVector, Int, BitType) -> Unit
+
+fn op_shl(BitVector, Int) -> BitVector
+
+fn op_shr(BitVector, Int) -> BitVector
+
+fn or(BitVector, BitVector) -> BitVector
+
+fn push(BitVector, BitType) -> Unit
+
+fn reset_all(BitVector) -> Unit
+
+fn serialization(BitVector) -> ByteVector
+
+fn set_all(BitVector) -> Unit
+
+fn set_number_count(BitVector) -> Int
+
+fn slice(BitVector, Int, Int) -> BitVector
+
+fn to_string(BitVector) -> String
+
+fn unset_number_count(BitVector) -> Int
+
+fn xor(BitVector, BitVector) -> BitVector
+
+// Types and methods
+pub(all) enum BitType {
+  Zero
+  One
+}
+impl Eq for BitType
+
+type BitVector
+impl BitVector {
+  and(Self, Self) -> Self
+  clear(Self) -> Unit
+  combine(Self, Self) -> Self
+  copy(Self) -> Self
+  find_first_set(Self) -> Int
+  find_first_unset(Self) -> Int
+  flip(Self, Int) -> Unit
+  new(Int) -> Self
+  not(Self) -> Self
+  op_get(Self, Int) -> BitType
+  op_set(Self, Int, BitType) -> Unit
+  op_shl(Self, Int) -> Self
+  op_shr(Self, Int) -> Self
+  or(Self, Self) -> Self
+  push(Self, BitType) -> Unit
+  reset_all(Self) -> Unit
+  serialization(Self) -> ByteVector
+  set_all(Self) -> Unit
+  set_number_count(Self) -> Int
+  slice(Self, Int, Int) -> Self
+  to_string(Self) -> String
+  unset_number_count(Self) -> Int
+  xor(Self, Self) -> Self
+}
+
+pub struct ByteVector {
+  len : Int
+  data : Array[Byte]
+}
+impl ByteVector {
+  deserialization(Self) -> BitVector
+}
+
+// Type aliases
+
+// Traits
+

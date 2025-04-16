@@ -58,6 +58,25 @@ pub fn flip(self : BitVector, index : Int) -> Unit {
 }
 
 ///|
+pub fn push(self : BitVector, data : BitType) -> Unit {
+  let pre_index = (self.len + 31) / 32
+  self.len += 1
+  let bit_index = (self.len + 31) / 32
+  let bit_rest = self.len % 32
+  if bit_index != pre_index {
+    self.data.push(0)
+  }
+  match data {
+    Zero => return
+    One => {
+      let one : UInt = 1
+      let num = one << (32 - bit_rest)
+      self.data[bit_index - 1] = self.data[bit_index - 1] | num
+    }
+  }
+}
+
+///|
 pub fn to_string(self : BitVector) -> String {
   let mut result = "["
   for i = 0; i < self.len; i = i + 1 {
@@ -348,88 +367,4 @@ pub fn deserialization(self : ByteVector) -> BitVector {
     }
   }
   vector
-}
-
-///|
-test "slice" {
-  let v = BitVector::new(100)
-  v.set_all()
-  v[50] = Zero
-  let ve = v.slice(0, 99)
-  inspect!(
-    v.to_string(),
-    content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
-  )
-  inspect!(
-    ve.to_string(),
-    content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
-  )
-  let byte = ve.serialization()
-  inspect!(
-    byte.data,
-    content="[b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xDF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xF0']",
-  )
-  let vector = byte.deserialization()
-  inspect!(vector.to_string(), content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]")
-}
-
-///|
-test "combine" {
-  let v1 = BitVector::new(68)
-  let v2 = BitVector::new(32)
-  let v3 = combine(v1, v2)
-  v3.set_all()
-  v3[50] = Zero
-  inspect!(
-    v3.to_string(),
-    content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
-  )
-}
-
-///|
-test {
-  let vector = BitVector::new(15)
-  vector.set_all()
-  inspect!(vector.to_string(), content="[111111111111111]")
-  let v1 = vector << 5
-  inspect!(v1.to_string(), content="[111111111100000]")
-}
-
-///|
-test "move" {
-  let vector = BitVector::new(50)
-  vector.set_all()
-  inspect!(
-    vector.to_string(),
-    content="[11111111111111111111111111111111111111111111111111]",
-  )
-  let v1 = vector << 35
-  inspect!(
-    v1.to_string(),
-    content="[11111111111111100000000000000000000000000000000000]",
-  )
-  let v2 = vector >> 35
-  inspect!(
-    v2.to_string(),
-    content="[00000000000000000000000000000000000111111111111111]",
-  )
-  let v3 = and(vector, v2)
-  inspect!(
-    v3.to_string(),
-    content="[00000000000000000000000000000000000111111111111111]",
-  )
-  let v4 = or(v1, v2)
-  inspect!(
-    v4.to_string(),
-    content="[11111111111111100000000000000000000111111111111111]",
-  )
-  let v5 = not(v4)
-  inspect!(
-    v5.to_string(),
-    content="[00000000000000011111111111111111111000000000000000]",
-  )
-  let num = set_number_count(vector)
-  inspect!(num, content="50")
-  inspect!(v5.find_first_set(), content="15")
-  inspect!(v4.find_first_unset(), content="15")
 }
