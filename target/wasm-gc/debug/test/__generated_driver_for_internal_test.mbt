@@ -12,8 +12,10 @@ typealias Moonbit_Test_Driver_Internal_No_Args_Map = @moonbitlang/core/builtin.M
 
 let moonbit_test_driver_internal_no_args_tests : Moonbit_Test_Driver_Internal_No_Args_Map = {
   "mutable_BitVector.mbt": {
-    0: (__test_6d757461626c655f426974566563746f722e6d6274_0, [""]),
-    1: (__test_6d757461626c655f426974566563746f722e6d6274_1, ["move"]),
+    0: (__test_6d757461626c655f426974566563746f722e6d6274_0, ["slice"]),
+    1: (__test_6d757461626c655f426974566563746f722e6d6274_1, ["combine"]),
+    2: (__test_6d757461626c655f426974566563746f722e6d6274_2, [""]),
+    3: (__test_6d757461626c655f426974566563746f722e6d6274_3, ["move"]),
   },
   "type.mbt": {
   },

@@ -93,7 +93,7 @@ pub fn reset_all(self : BitVector) -> Unit {
 }
 
 ///|
-pub fn move_left(self : BitVector, size : Int) -> BitVector {
+pub fn op_shl(self : BitVector, size : Int) -> BitVector {
   let new_vector = BitVector::new(self.len)
   if size >= self.len {
     new_vector.reset_all()
@@ -132,7 +132,7 @@ pub fn move_left(self : BitVector, size : Int) -> BitVector {
 
 ///|
 /// move right needs to delete all the elements that moved out of your lens
-pub fn move_right(self : BitVector, size : Int) -> BitVector {
+pub fn op_shr(self : BitVector, size : Int) -> BitVector {
   let new_vector = BitVector::new(self.len)
   if size >= self.len {
     new_vector.reset_all()
@@ -177,12 +177,12 @@ fn meet_two_vector(
     let derta = self.len - other.len
     let short = other.copy()
     short.len = self.len
-    return (self, short.move_right(derta))
+    return (self, short >> derta)
   } else {
     let derta = other.len - self.len
     let short = self.copy()
     short.len = self.len
-    return (other, short.move_right(derta))
+    return (other, short >> derta)
   }
 }
 
@@ -234,7 +234,10 @@ pub fn not(self : BitVector) -> BitVector {
 }
 
 ///|
-pub fn population_count(self : BitVector) -> Int {
+pub fn set_number_count(self : BitVector) -> Int {
+  if self.len == 0 {
+    return 0
+  }
   loop self[0], self.len - 1, 0 {
     One, 0, sum => return sum + 1
     Zero, 0, sum => return sum
@@ -244,11 +247,151 @@ pub fn population_count(self : BitVector) -> Int {
 }
 
 ///|
+pub fn unset_number_count(self : BitVector) -> Int {
+  if self.len == 0 {
+    return 0
+  }
+  loop self[0], self.len - 1, 0 {
+    Zero, 0, sum => return sum + 1
+    One, 0, sum => return sum
+    Zero, i, sum => continue self[self.len - 1 - i], i - 1, sum + 1
+    One, i, sum => continue self[self.len - 1 - i], i - 1, sum
+  }
+}
+
+///|
+pub fn find_first_set(self : BitVector) -> Int {
+  guard self.len != 0
+  loop self[0], 0 {
+    One, i => return i
+    Zero, i => continue self[i + 1], i + 1
+  }
+}
+
+///|
+pub fn find_first_unset(self : BitVector) -> Int {
+  guard self.len != 0
+  loop self[0], 0 {
+    Zero, i => return i
+    One, i => continue self[i + 1], i + 1
+  }
+}
+
+///|
+pub fn slice(self : BitVector, begin : Int, end : Int) -> BitVector {
+  guard begin >= 0 && end <= self.len
+  let v = self << begin
+  let new_v = BitVector::new(end - begin + 1)
+  let new_index = (end - begin + 32) / 32
+  for i in 0..<new_index {
+    new_v.data[i] = v.data[i]
+  }
+  new_v
+}
+
+///|
+pub fn combine(self : BitVector, other : BitVector) -> BitVector {
+  let size = self.len + other.len
+  let new_v = BitVector::new(size)
+  let num = (size + 31) / 32
+  let self_index = (self.len + 31) / 32
+  let self_rest = self.len % 32
+  if self_rest == 0 {
+    for i in 0..<num {
+      if i < self_index {
+        new_v.data[i] = self.data[i]
+      } else {
+        new_v.data[i] = other.data[i - self_index]
+      }
+    }
+  } else {
+    for i in 0..<num {
+      if i < self_index {
+        new_v.data[i] = self.data[i]
+      } else if i == self_index {
+        let m = other.data[0] << (32 - self_rest)
+        new_v.data[i] = new_v.data[i] | m
+      } else {
+        let current = new_v.data[i] << (32 - self_rest)
+        let front = new_v.data[i - 1] >> self_rest
+        new_v.data[i] = current | front
+      }
+    }
+  }
+  new_v
+}
+
+///|
+pub fn serialization(self : BitVector) -> ByteVector {
+  let byte_size = (self.len + 7) / 8
+  let byte_array = Array::makei(byte_size, fn { _ => b'\x00' })
+  for i in 0..<byte_size {
+    let num = self.data[i / 4] >> ((3 - i % 4) * 8)
+    byte_array[i] = num.to_byte()
+  }
+  { len: self.len, data: byte_array }
+}
+
+///|
+pub fn deserialization(self : ByteVector) -> BitVector {
+  let vector = BitVector::new(self.len)
+  let bit_size = (self.len + 31) / 32
+  let byte_size = (self.len + 7) / 8
+  for i in 0..<bit_size {
+    for j in 0..<4 {
+      if 4 * i + j < byte_size {
+        let num = self.data[4 * i + j].to_uint() << ((3 - j) * 8)
+        vector.data[i] = vector.data[i] | num
+      } else {
+        break
+      }
+    }
+  }
+  vector
+}
+
+///|
+test "slice" {
+  let v = BitVector::new(100)
+  v.set_all()
+  v[50] = Zero
+  let ve = v.slice(0, 99)
+  inspect!(
+    v.to_string(),
+    content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
+  )
+  inspect!(
+    ve.to_string(),
+    content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
+  )
+  let byte = ve.serialization()
+  inspect!(
+    byte.data,
+    content="[b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xDF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xF0']",
+  )
+  let vector = byte.deserialization()
+  inspect!(vector.to_string(), content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]")
+}
+
+///|
+test "combine" {
+  let v1 = BitVector::new(68)
+  let v2 = BitVector::new(32)
+  let v3 = combine(v1, v2)
+  v3.set_all()
+  v3[50] = Zero
+  inspect!(
+    v3.to_string(),
+    content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
+  )
+}
+
+///|
 test {
   let vector = BitVector::new(15)
   vector.set_all()
   inspect!(vector.to_string(), content="[111111111111111]")
-  let v1 = vector.move_left(5)
+  let v1 = vector << 5
   inspect!(v1.to_string(), content="[111111111100000]")
 }
 
@@ -260,12 +403,12 @@ test "move" {
     vector.to_string(),
     content="[11111111111111111111111111111111111111111111111111]",
   )
-  let v1 = vector.move_left(35)
+  let v1 = vector << 35
   inspect!(
     v1.to_string(),
     content="[11111111111111100000000000000000000000000000000000]",
   )
-  let v2 = vector.move_right(35)
+  let v2 = vector >> 35
   inspect!(
     v2.to_string(),
     content="[00000000000000000000000000000000000111111111111111]",
@@ -285,6 +428,8 @@ test "move" {
     v5.to_string(),
     content="[00000000000000011111111111111111111000000000000000]",
   )
-  let num = population_count(vector)
+  let num = set_number_count(vector)
   inspect!(num, content="50")
+  inspect!(v5.find_first_set(), content="15")
+  inspect!(v4.find_first_unset(), content="15")
 }
