@@ -380,7 +380,15 @@ pub fn BitVector::bool_to_bitvector(self : Array[Bool]) -> BitVector {
 /// The iter method converts a `BitVector` into an iterator of
 /// type `Iter[Bool]`.
 pub fn BitVector::iter(self : BitVector) -> Iter[Bool] {
-  self.to_bool().iter()
+  Iter::new(fn(yield_) {
+    let len = self.len
+    for i in 0..<len {
+      guard yield_(self[i]) is IterContinue else { break IterEnd }
+
+    } else {
+      IterContinue
+    }
+  })
 }
 
 ///|
@@ -478,4 +486,11 @@ pub fn BitVector::deserialization(self : Bytes) -> BitVector {
     }
   }
   vector
+}
+
+test "Iter" {
+  let v1 = BitVector::new(33)
+  for i in v1.iter(){
+    inspect!(i, content="false")
+  }
 }
