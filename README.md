@@ -2,7 +2,7 @@
 
 ---
 
-[English-doc](./doc/README.md) | [简体中文-文档](./doc/README.zh-CN.md)
+[English-doc](./doc/introduction_EN.md) | [简体中文-文档](./doc/introduction_CN.md)
 
 **BitVector** is an efficient bit vector structure for storing boolean values, supporting fast bitwise operations. Internally, it uses the `UInt` type, with each element storing 32 bits.
 
