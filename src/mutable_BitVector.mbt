@@ -7,7 +7,12 @@ pub fn BitVector::new(length : Int) -> BitVector {
 }
 
 ///|
-pub fn copy(self : BitVector) -> BitVector {
+pub fn BitVector::length(self : BitVector) -> Int {
+  self.len
+}
+
+///|
+pub fn BitVector::copy(self : BitVector) -> BitVector {
   { len: self.len, data: self.data.copy() }
 }
 
@@ -77,7 +82,7 @@ pub fn push(self : BitVector, data : BitType) -> Unit {
 }
 
 ///|
-pub fn to_string(self : BitVector) -> String {
+pub impl Show for BitVector with to_string(self) {
   let mut result = "["
   for i = 0; i < self.len; i = i + 1 {
     match self[i] {
@@ -86,6 +91,11 @@ pub fn to_string(self : BitVector) -> String {
     }
   }
   result + "]"
+}
+
+///|
+pub impl Show for BitVector with output(s, l) {
+  l.write_string(s.to_string())
 }
 
 ///|
@@ -341,25 +351,67 @@ pub fn combine(self : BitVector, other : BitVector) -> BitVector {
 }
 
 ///|
-pub fn serialization(self : BitVector) -> ByteVector {
+pub fn BitVector::to_bool(self : BitVector) -> Array[Bool] {
+  let size = self.len
+  let array_bool = Array::makei(size, fn(_) { false })
+  for i in 0..<size {
+    match self[i] {
+      Zero => array_bool[i] = false
+      One => array_bool[i] = true
+    }
+  }
+  array_bool
+}
+
+///|
+pub fn BitVector::iter(self : BitVector) -> Iter[Bool] {
+  self.to_bool().iter()
+}
+
+///|
+pub fn BitVector::serialization_front(self : BitVector) -> Bytes {
+  let byte_size = (self.len + 7) / 8
+  let byte_rest = self.len % 8
+  let byte_array = Array::makei(byte_size, fn { _ => b'\x00' })
+  let fir = self.data[0] >> (32 - byte_rest)
+  byte_array[0] = (fir | 0).to_byte()
+  for i in 1..<byte_size {
+    if i % 4 == 0 {
+      let max : UInt = 4294967295
+      let middle = max >> (24 + byte_rest)
+      let pre = self.data[i / 4 - 1] & middle
+      let now = self.data[i / 4] >> (32 - byte_rest)
+      let num = pre | now
+      byte_array[i] = num.to_byte()
+    } else {
+      let num = self.data[i / 4] >> ((3 - i % 4) * 8 + byte_rest)
+      byte_array[i] = num.to_byte()
+    }
+  }
+  @bytes.from_array(byte_array)
+}
+
+///|
+pub fn BitVector::serialization_back(self : BitVector) -> Bytes {
   let byte_size = (self.len + 7) / 8
   let byte_array = Array::makei(byte_size, fn { _ => b'\x00' })
   for i in 0..<byte_size {
     let num = self.data[i / 4] >> ((3 - i % 4) * 8)
     byte_array[i] = num.to_byte()
   }
-  { len: self.len, data: byte_array }
+  @bytes.from_array(byte_array)
 }
 
 ///|
-pub fn deserialization(self : ByteVector) -> BitVector {
-  let vector = BitVector::new(self.len)
-  let bit_size = (self.len + 31) / 32
-  let byte_size = (self.len + 7) / 8
+pub fn BitVector::deserialization(self : Bytes) -> BitVector {
+  let len = self.length() * 8
+  let vector = BitVector::new(len)
+  let bit_size = (len + 31) / 32
+  let byte_size = (len + 7) / 8
   for i in 0..<bit_size {
     for j in 0..<4 {
       if 4 * i + j < byte_size {
-        let num = self.data[4 * i + j].to_uint() << ((3 - j) * 8)
+        let num = self[4 * i + j].to_uint() << ((3 - j) * 8)
         vector.data[i] = vector.data[i] | num
       } else {
         break

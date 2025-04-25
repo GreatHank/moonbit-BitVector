@@ -5,22 +5,25 @@ test "slice" {
   v[50] = Zero
   let ve = v.slice(0, 99)
   inspect!(
-    v.to_string(),
+    v,
     content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
   )
+  inspect!(v.length(), content="100")
   inspect!(
-    ve.to_string(),
+    ve,
     content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
   )
-  let byte = ve.serialization()
+  let byte = ve.serialization_back()
   inspect!(
-    byte.data,
-    content="[b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xDF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xFF', b'\\xF0']",
+    byte,
+    content=
+      #|b"\xff\xff\xff\xff\xff\xff\xdf\xff\xff\xff\xff\xff\xf0"
+    ,
   )
-  let vector = byte.deserialization()
+  let vector = BitVector::deserialization(byte)
   inspect!(
-    vector.to_string(),
-    content="[1111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111]",
+    vector,
+    content="[11111111111111111111111111111111111111111111111111011111111111111111111111111111111111111111111111110000]",
   )
 }
 
@@ -86,4 +89,29 @@ test "move" {
   inspect!(num, content="50")
   inspect!(v5.find_first_set(), content="15")
   inspect!(v4.find_first_unset(), content="15")
+}
+
+///|
+test "serialization" {
+  let vector = BitVector::new(33)
+  vector[32] = One
+  let bool = vector.to_bool()
+  let bytes_back = vector.serialization_back()
+  let bytes_front = vector.serialization_front()
+  inspect!(
+    bool,
+    content="[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true]",
+  )
+  inspect!(
+    bytes_back,
+    content=
+      #|b"\x00\x00\x00\x00\x80"
+    ,
+  )
+  inspect!(
+    bytes_front,
+    content=
+      #|b"\x00\x00\x00\x00\x01"
+    ,
+  )
 }

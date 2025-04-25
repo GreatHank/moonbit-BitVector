@@ -9,9 +9,3 @@ struct BitVector {
   mut len : Int
   data : Array[UInt]
 }
-
-///|
-pub struct ByteVector {
-  len : Int
-  data : Array[Byte]
-}
