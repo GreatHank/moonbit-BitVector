@@ -77,12 +77,12 @@ test "move" {
   )
   let v4 = or(v1, v2)
   inspect!(
-    v4.to_string(),
+    v4,
     content="[11111111111111100000000000000000000111111111111111]",
   )
   let v5 = not(v4)
   inspect!(
-    v5.to_string(),
+    v5,
     content="[00000000000000011111111111111111111000000000000000]",
   )
   let num = set_number_count(vector)
@@ -116,6 +116,8 @@ test "serialization" {
   )
   let v1 = BitVector::deserialization(bytes_front)
   inspect!(v1, content="[0000000000000000000000000000000000000001]")
-  let v2 = BitVector::bool_to_bitvector(bool)
-  inspect!(v2, content="[000000000000000000000000000000001]")
+  let v2 = BitVector::deserialization(bytes_back)
+  inspect!(v2, content="[0000000000000000000000000000000010000000]")
+  let v3 = BitVector::bool_to_bitvector(bool)
+  inspect!(v3, content="[000000000000000000000000000000001]")
 }

@@ -377,11 +377,27 @@ pub fn BitVector::bool_to_bitvector(self : Array[Bool]) -> BitVector {
 }
 
 ///|
+/// The iter method converts a `BitVector` into an iterator of
+/// type `Iter[Bool]`.
 pub fn BitVector::iter(self : BitVector) -> Iter[Bool] {
   self.to_bool().iter()
 }
 
 ///|
+/// Serialization means change the type `BitVector` to the type `Bytes`.
+/// What's more, the size of `Bytes` is 8 so the length of `BitVector`
+/// should be extended to a multiple of 8.
+/// 
+/// **Attention** :
+/// In this method, the zero-padding should be applied at the beginning.
+/// 
+/// **Example**:
+/// ```
+/// moonbit
+/// let vector = BitVector::new(33)
+/// let bytes_front = vector.serialization_front()
+/// inspect!(bytes_front, content = b"\x00\x00\x00\x00\x01")
+/// ```
 pub fn BitVector::serialization_front(self : BitVector) -> Bytes {
   let byte_size = (self.len + 7) / 8
   let byte_rest = self.len % 8
@@ -405,6 +421,20 @@ pub fn BitVector::serialization_front(self : BitVector) -> Bytes {
 }
 
 ///|
+/// Serialization means change the type `BitVector` to the type `Bytes`.
+/// What's more, the size of `Bytes` is 8 so the length of `BitVector`
+/// should be extended to a multiple of 8.
+/// 
+/// **Attention** :
+/// In this method, the `BitVector` will pad with zero at the end.
+/// 
+/// **Example** :
+/// ```
+/// moonbit
+/// let vector = BitVector::new(33)
+/// let bytes_back = vector.serialization_back()
+/// inspect!(bytes_back, content= b"\x00\x00\x00\x00\x80")
+/// ```
 pub fn BitVector::serialization_back(self : BitVector) -> Bytes {
   let byte_size = (self.len + 7) / 8
   let byte_array = Array::makei(byte_size, fn { _ => b'\x00' })
@@ -416,6 +446,22 @@ pub fn BitVector::serialization_back(self : BitVector) -> Bytes {
 }
 
 ///|
+/// Deserialization means change a `Bytes` type to `BitVector`.
+/// 
+/// **Attention**: This method might change the length of your `BitVector`.
+/// It depends the definition of your choice of the `serialization`.
+/// 
+/// **Example**:
+/// ```
+/// moonbit
+/// let vector = BitVector::new(33)
+/// let bytes_back = vector.serialization_back()
+/// let bytes_front = vector.serialization_front()
+/// let v1 = BitVector::deserialization(bytes_front)
+/// inspect!(v1, content="[0000000000000000000000000000000000000001]")
+/// let v2 = BitVector::deserialization(bytes_back)
+/// inspect!(v2, content="[0000000000000000000000000000000010000000]")
+/// ```
 pub fn BitVector::deserialization(self : Bytes) -> BitVector {
   let len = self.length() * 8
   let vector = BitVector::new(len)
