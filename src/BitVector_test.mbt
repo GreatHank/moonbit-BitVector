@@ -114,4 +114,8 @@ test "serialization" {
       #|b"\x00\x00\x00\x00\x01"
     ,
   )
+  let v1 = BitVector::deserialization(bytes_front)
+  inspect!(v1, content="[0000000000000000000000000000000000000001]")
+  let v2 = BitVector::bool_to_bitvector(bool)
+  inspect!(v2,content="[000000000000000000000000000000001]")
 }

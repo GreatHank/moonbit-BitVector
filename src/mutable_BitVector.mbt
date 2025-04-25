@@ -364,6 +364,19 @@ pub fn BitVector::to_bool(self : BitVector) -> Array[Bool] {
 }
 
 ///|
+pub fn BitVector::bool_to_bitvector(self : Array[Bool]) -> BitVector {
+  let size = self.length()
+  let bit_array = BitVector::new(size)
+  for index, i in self {
+    match i {
+      true => bit_array[index] = One
+      false => bit_array[index] = Zero
+    }
+  }
+  bit_array
+}
+
+///|
 pub fn BitVector::iter(self : BitVector) -> Iter[Bool] {
   self.to_bool().iter()
 }
