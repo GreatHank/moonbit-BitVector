@@ -382,18 +382,17 @@ pub fn BitVector::bool_to_bitvector(self : Array[Bool]) -> BitVector {
 pub fn BitVector::iter(self : BitVector) -> Iter[Bool] {
   Iter::new(fn(yield_) {
     let len = self.len
-    for i in 0..<len {
-      let block = (i + 31) / 32
-      let rest = i % 32
-      let one : UInt = 1
-      let num = one << (32 - rest)
-      let target = self.data[block] & num
-      let bool = match target {
-        0 => false
-        _ => true
+    let mut count = 0
+    outer~: for x in self.data {
+      for i in 0..<32 {
+        let num : UInt = 1
+        let target = x & num
+        let bool = target != 0
+        guard count < len && yield_(bool) is IterContinue else {
+          break outer~ IterEnd
+        }
+        count += 1
       }
-      guard yield_(bool) is IterContinue else { break IterEnd }
-
     } else {
       IterContinue
     }
