@@ -76,15 +76,9 @@ test "move" {
     content="[00000000000000000000000000000000000111111111111111]",
   )
   let v4 = or(v1, v2)
-  inspect!(
-    v4,
-    content="[11111111111111100000000000000000000111111111111111]",
-  )
+  inspect!(v4, content="[11111111111111100000000000000000000111111111111111]")
   let v5 = not(v4)
-  inspect!(
-    v5,
-    content="[00000000000000011111111111111111111000000000000000]",
-  )
+  inspect!(v5, content="[00000000000000011111111111111111111000000000000000]")
   let num = set_number_count(vector)
   inspect!(num, content="50")
   inspect!(v5.find_first_set(), content="15")
@@ -120,4 +114,12 @@ test "serialization" {
   inspect!(v2, content="[0000000000000000000000000000000010000000]")
   let v3 = BitVector::bool_to_bitvector(bool)
   inspect!(v3, content="[000000000000000000000000000000001]")
+}
+
+///|
+test "Iter" {
+  let v1 = BitVector::new(33)
+  for i in v1.iter() {
+    inspect!(i, content="false")
+  }
 }

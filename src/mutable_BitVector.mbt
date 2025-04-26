@@ -383,7 +383,16 @@ pub fn BitVector::iter(self : BitVector) -> Iter[Bool] {
   Iter::new(fn(yield_) {
     let len = self.len
     for i in 0..<len {
-      guard yield_(self[i]) is IterContinue else { break IterEnd }
+      let block = (i + 31) / 32
+      let rest = i % 32
+      let one : UInt = 1
+      let num = one << (32 - rest)
+      let target = self.data[block] & num
+      let bool = match target {
+        0 => false
+        _ => true
+      }
+      guard yield_(bool) is IterContinue else { break IterEnd }
 
     } else {
       IterContinue
@@ -486,11 +495,4 @@ pub fn BitVector::deserialization(self : Bytes) -> BitVector {
     }
   }
   vector
-}
-
-test "Iter" {
-  let v1 = BitVector::new(33)
-  for i in v1.iter(){
-    inspect!(i, content="false")
-  }
 }
